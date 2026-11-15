@@ -176,9 +176,10 @@ html.veil-in .veil__label span { transform: none; }
 html.veil-in .veil { pointer-events: all; }
 
 /* ---------- First-visit loader ---------- */
-/* Warm ivory, a centred wordmark that comes into focus, a hairline that
-   tracks loading, then an aperture onto the hero photograph that opens
-   to full screen and hands over to the hero itself. */
+/* The wordmark comes into focus on warm ivory while a hairline tracks
+   loading. Then the ink drains from the letters, leaving them cut out of
+   the sheet so the hero shows through, and the camera flies into one of
+   them until the sheet has gone. */
 .loader {
   position: fixed;
   inset: 0;
@@ -189,8 +190,8 @@ html.veil-in .veil { pointer-events: all; }
   background: radial-gradient(60vmax 46vmax at 50% 56%, var(--glow), transparent 70%), var(--paper);
 }
 html.js:not(.veil-in) .loader { display: block; }
-.loader__window { position: absolute; inset: 0; clip-path: inset(50% 50% 50% 50% round 18px); }
-.loader__window img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; transform-origin: 50% 40%; filter: sepia(0.14) saturate(1.06) contrast(1.02); }
+/* Built in JS: an ivory sheet with the wordmark cut out of it */
+.loader__cut { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .loader__center {
   position: absolute;
   inset: 0;
@@ -431,8 +432,7 @@ html.js .hero__title { visibility: hidden; }
 }
 .hero__media { position: absolute; inset: 0; overflow: hidden; }
 .hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; transform-origin: 50% 40%; }
-.hero__media::after,
-.loader__window::after {
+.hero__media::after {
   content: '';
   position: absolute;
   inset: 0;
