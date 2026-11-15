@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier — Vérane</title>
+  <meta name="description" content="Inside the Vérane atelier on Rue de Saintonge, Paris: our materials, process and private appointments.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23161513'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='44' fill='%23efece6'%3EV%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    document.documentElement.classList.add('js');
+    try { if (sessionStorage.getItem('veil')) document.documentElement.classList.add('veil-in'); } catch (e) {}
+  </script>
+</head>
+<body data-page="atelier" id="top">
+
+  <!-- Page transition veil -->
+  <div class="veil" data-veil aria-hidden="true">
+    <div class="veil__col"></div><div class="veil__col"></div><div class="veil__col"></div><div class="veil__col"></div><div class="veil__col"></div>
+    <div class="veil__label"><span data-veil-text></span></div>
+  </div>
+
+  <main>
+    <section class="a-hero wrap">
+      <h1 class="h1 a-hero__title" data-split>Eleven pairs<br>of <em>hands</em></h1>
+      <div class="a-hero__media">
+        <div class="frame" data-atelier-hero data-reveal-img>
+          <img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&w=2400&q=80" alt="Model in a caramel coat in soft light">
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap">
+      <div class="a-story">
+        <p class="lead" data-split>Behind a courtyard on Rue de Saintonge, eleven artisans work at a pace set by the cloth, <em>not the calendar.</em></p>
+        <p class="body-copy" data-fade>One pattern, drafted by hand. One cutter per garment. One finisher who signs the label.</p>
+      </div>
+    </section>
+
+    <section class="wrap" style="padding-bottom:var(--section)">
+      <div class="headrow">
+        <h2 class="h2" data-split>The <em>process</em></h2>
+      </div>
+      <div class="process__list" data-process>
+          <div class="process__row" data-fade>
+            <h3 class="process__name">Sourcing</h3>
+            <p class="process__desc body-copy">We buy cloth by the bolt from a handful of mills we have worked with for decades, and every fibre can be traced to its farm.</p>
+            <img class="process__thumb" src="https://images.unsplash.com/photo-1602706294170-1fed8eecd9f9?auto=format&fit=crop&w=800&q=80" alt="Sourcing" loading="lazy">
+          </div>
+          <div class="process__row" data-fade>
+            <h3 class="process__name">Pattern</h3>
+            <p class="process__desc body-copy">Each pattern is drafted by hand in paper, then refined across three toiles until the line falls exactly as intended.</p>
+            <img class="process__thumb" src="https://images.unsplash.com/photo-1613915617430-8ab0fd7c6baf?auto=format&fit=crop&w=800&q=80" alt="Pattern" loading="lazy">
+          </div>
+          <div class="process__row" data-fade>
+            <h3 class="process__name">Construction</h3>
+            <p class="process__desc body-copy">Half-canvassed fronts, hand-set sleeves and over two hundred hand stitches in every collar.</p>
+            <img class="process__thumb" src="https://images.unsplash.com/photo-1641642231157-0849081598a2?auto=format&fit=crop&w=800&q=80" alt="Construction" loading="lazy">
+          </div>
+          <div class="process__row" data-fade>
+            <h3 class="process__name">Finishing</h3>
+            <p class="process__desc body-copy">Pressed, inspected and signed by the artisan who made it — then repaired by them whenever it needs it.</p>
+            <img class="process__thumb" src="https://images.unsplash.com/photo-1773747310674-b42a55d72003?auto=format&fit=crop&w=800&q=80" alt="Finishing" loading="lazy">
+          </div>
+      </div>
+    </section>
+
+    <section class="section" style="background:var(--paper)">
+      <div class="wrap quote-block">
+        <p class="lead" data-split>“A coat should take longer to make than it takes to <em>forget.</em>”</p>
+        <p class="small muted" data-fade>Hélène Vérane</p>
+      </div>
+    </section>
+
+    <section class="section wrap" id="contact">
+      <div class="grid contact">
+        <div class="contact__title">
+          <h2 class="h2" data-split>Private <em>appointments</em> in Paris</h2>
+        </div>
+        <div class="contact__info small">
+          <div data-fade><h4>Atelier</h4><p class="muted">12 Rue de Saintonge<br>75003 Paris, France</p></div>
+          <div data-fade><h4>Hours</h4><p class="muted">Tuesday — Saturday<br>11:00 — 19:00</p></div>
+          <div data-fade><h4>Contact</h4><p class="muted">+33 1 00 00 00 00<br>care@verane.example</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="process__float" data-process-float aria-hidden="true">
+        <img src="https://images.unsplash.com/photo-1602706294170-1fed8eecd9f9?auto=format&fit=crop&w=700&q=80" alt="" class="is-active">
+        <img src="https://images.unsplash.com/photo-1613915617430-8ab0fd7c6baf?auto=format&fit=crop&w=700&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1641642231157-0849081598a2?auto=format&fit=crop&w=700&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1773747310674-b42a55d72003?auto=format&fit=crop&w=700&q=80" alt="">
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"></script>
+  <script src="js/transition.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
