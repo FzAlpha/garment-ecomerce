@@ -4,13 +4,19 @@
    ========================================================================== */
 
 :root {
-  --bg: #efece6;
-  --paper: #f7f5f1;
-  --ink: #161513;
-  --ink-soft: #3a3833;
-  --muted: #7d776d;
-  --line: rgba(22, 21, 19, 0.14);
-  --white: #faf9f6;
+  --bg: #f1e8db;
+  --paper: #f8f1e7;
+  --ink: #1f1913;
+  --ink-soft: #4a3f34;
+  --muted: #8b7b69;
+  --line: rgba(31, 25, 19, 0.14);
+  --white: #fcf7ef;
+  --placeholder: #e3d5c2;
+  --glow: rgba(236, 178, 120, 0.30);
+  --glow-soft: rgba(222, 150, 108, 0.16);
+
+  --radius: clamp(10px, 1.1vw, 18px);
+  --radius-sm: 8px;
 
   --serif: 'Instrument Serif', 'Times New Roman', serif;
   --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
@@ -47,6 +53,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: -10vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55vmax 42vmax at 12% 4%, var(--glow), transparent 70%),
+    radial-gradient(48vmax 40vmax at 96% 88%, var(--glow-soft), transparent 70%);
 }
 img, video { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
@@ -257,7 +273,7 @@ html.js:not(.veil-in) .loader { display: block; }
    Cart drawer
    ========================================================================== */
 .cart { position: fixed; inset: 0; z-index: 160; visibility: hidden; }
-.cart__backdrop { position: absolute; inset: 0; background: rgba(22, 21, 19, 0.35); opacity: 0; }
+.cart__backdrop { position: absolute; inset: 0; background: rgba(31, 25, 19, 0.38); opacity: 0; }
 .cart__panel {
   position: absolute;
   top: 0; right: 0; bottom: 0;
@@ -272,7 +288,7 @@ html.js:not(.veil-in) .loader { display: block; }
 .cart__items { flex: 1; overflow-y: auto; padding: 8px var(--pad); }
 .cart__empty { padding: 48px 0; color: var(--muted); }
 .cart__item { display: grid; grid-template-columns: 84px 1fr auto; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
-.cart__item img { width: 84px; aspect-ratio: 3 / 4; object-fit: cover; }
+.cart__item img { width: 84px; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--radius-sm); }
 .cart__item h4 { font-weight: 400; font-size: var(--fs-base); }
 .cart__remove { font-size: var(--fs-xs); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; margin-top: 10px; }
 .cart__foot { border-top: 1px solid var(--line); display: grid; gap: 18px; }
@@ -354,10 +370,10 @@ html.js:not(.veil-in) .loader { display: block; }
   width: 108px; height: 108px;
   margin: -54px 0 0 -54px;
   border-radius: 50%;
-  background: rgba(247, 245, 241, 0.86);
+  background: rgba(248, 241, 231, 0.86);
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   backdrop-filter: blur(10px) saturate(1.2);
-  box-shadow: 0 0 0 1px rgba(22, 21, 19, 0.06), 0 18px 40px -18px rgba(22, 21, 19, 0.35);
+  box-shadow: 0 0 0 1px rgba(31, 25, 19, 0.06), 0 18px 40px -18px rgba(90, 52, 22, 0.45);
   color: var(--ink);
   pointer-events: none;
   display: none;
@@ -393,6 +409,9 @@ html.js [data-fade],
 html.js .hero__title { visibility: hidden; }
 .mask { overflow: hidden; }
 [data-reveal-img] { overflow: hidden; }
+.frame img, .card__img, .hero__media img, .bleed__media img, .process__float img, .process__thumb, .cart__item img {
+  filter: sepia(0.14) saturate(1.06) contrast(1.02);
+}
 [data-parallax] { overflow: hidden; }
 [data-parallax] > img { will-change: transform; height: 120%; margin-top: -10%; }
 
@@ -413,7 +432,7 @@ html.js .hero__title { visibility: hidden; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.32) 100%);
+  background: linear-gradient(180deg, rgba(40,24,10,0.16) 0%, rgba(40,24,10,0) 24%, rgba(40,24,10,0) 58%, rgba(40,24,10,0.40) 100%), radial-gradient(80% 60% at 50% 100%, rgba(214,140,80,0.22), transparent 70%);
 }
 .hero__content {
   position: absolute;
@@ -445,7 +464,7 @@ html.js .hero__title { visibility: hidden; }
 .editorial__main .frame { aspect-ratio: 4 / 5; }
 .editorial__side { grid-column: 9 / 13; align-self: end; }
 .editorial__side .frame { aspect-ratio: 3 / 4; }
-.frame { position: relative; overflow: hidden; background: #ddd8cf; }
+.frame { position: relative; overflow: hidden; background: var(--placeholder); border-radius: var(--radius); isolation: isolate; }
 .frame img { width: 100%; height: 100%; object-fit: cover; }
 /* Parallax images are taller than their frame so the drift never shows an edge */
 [data-parallax] img { position: absolute; left: 0; top: -9%; height: 118%; }
@@ -460,7 +479,7 @@ html.js .hero__title { visibility: hidden; }
 /* ---------- Product card ---------- */
 .products { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(36px, 4vw, 64px) var(--gap); }
 .card__link { display: block; }
-.card__media { position: relative; aspect-ratio: 3 / 4; overflow: hidden; background: #ddd8cf; }
+.card__media { position: relative; aspect-ratio: 3 / 4; overflow: hidden; background: var(--placeholder); border-radius: var(--radius); isolation: isolate; }
 .card__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-out), opacity 0.8s var(--ease); }
 .card__img--alt { opacity: 0; transform: scale(1.06); }
 .card__link:hover .card__img { transform: scale(1.04); }
@@ -487,9 +506,9 @@ html.js .hero__title { visibility: hidden; }
 /* ---------- Full-bleed clip reveal ---------- */
 .bleed { position: relative; height: 220vh; }
 .bleed__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: grid; place-items: center; }
-.bleed__media { position: absolute; inset: 0; clip-path: inset(18% 26% 18% 26%); will-change: clip-path; }
+.bleed__media { position: absolute; inset: 0; clip-path: inset(18% 26% 18% 26% round 18px); will-change: clip-path; }
 .bleed__media img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); }
-.bleed__media::after { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.25); }
+.bleed__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(40, 24, 10, 0.18), rgba(40, 24, 10, 0.34)); }
 .bleed__quote { position: relative; z-index: 2; color: var(--white); text-align: center; padding-inline: var(--pad); }
 .bleed__quote p { max-width: 11ch; margin-inline: auto; font-family: var(--serif); font-size: clamp(44px, 7vw, 120px); line-height: 0.96; letter-spacing: -0.02em; }
 
@@ -519,7 +538,7 @@ html.js .hero__title { visibility: hidden; }
   margin-inline: -0.02em;
 }
 .footer__mark span { display: inline-block; }
-.footer__bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(239, 236, 230, 0.15); font-size: var(--fs-xs); color: rgba(239, 236, 230, 0.55); }
+.footer__bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(241, 232, 219, 0.15); font-size: var(--fs-xs); color: rgba(241, 232, 219, 0.55); }
 .footer__bottom a:hover { color: var(--bg); }
 
 /* ==========================================================================
@@ -547,7 +566,7 @@ html.js .hero__title { visibility: hidden; }
 .card.is-hidden { display: none; }
 .card--editorial { grid-column: span 2; grid-row: span 1; }
 .card--editorial .card__media { aspect-ratio: auto; height: 100%; min-height: 100%; }
-.card--editorial .card__overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(20px, 2.4vw, 36px); color: var(--white); background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.4)); }
+.card--editorial .card__overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(20px, 2.4vw, 36px); color: var(--white); background: linear-gradient(180deg, transparent 45%, rgba(40,24,10,0.46)); }
 
 /* ==========================================================================
    PRODUCT
@@ -617,6 +636,7 @@ html.js .hero__title { visibility: hidden; }
   opacity: 0;
   transform: scale(0.85);
 }
+.process__float { border-radius: var(--radius); }
 .process__float img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s; }
 .process__float img.is-active { opacity: 1; }
 
@@ -672,7 +692,7 @@ html.js .hero__title { visibility: hidden; }
 
   .process__name { grid-column: 1 / -1; }
   .process__desc { grid-column: 1 / -1; margin-top: 14px; }
-  .process__thumb { display: block; grid-column: 1 / -1; margin-top: 20px; aspect-ratio: 16 / 10; }
+  .process__thumb { display: block; grid-column: 1 / -1; margin-top: 20px; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--radius); }
   .process__float { display: none; }
 
   .contact__title, .contact__info { grid-column: 1 / -1; }

@@ -12,6 +12,8 @@
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const page = document.body.dataset.page;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Current image corner radius in px (the CSS token is fluid, clip-path needs a number)
+  const radius = () => parseFloat(getComputedStyle(document.querySelector('.frame, .card__media') || document.body).borderTopLeftRadius) || 0;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   /* ------------------------------------------------------------------
@@ -388,7 +390,7 @@
     $$('[data-reveal-img]').forEach((el) => {
       const img = $('img', el);
       gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 88%', once: true } })
-        .fromTo(el, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power4.inOut' })
+        .fromTo(el, { clipPath: `inset(100% 0% 0% 0% round ${radius()}px)` }, { clipPath: `inset(0% 0% 0% 0% round ${radius()}px)`, duration: 1.5, ease: 'power4.inOut', clearProps: 'clipPath' })
         .fromTo(img, { scale: 1.3 }, { scale: 1, duration: 1.9, ease: 'expo.out' }, 0.2);
     });
 
@@ -482,7 +484,7 @@
         gsap.timeline({ scrollTrigger: { trigger: '[data-bleed]', start: 'top top', end: 'bottom bottom', scrub: true } })
           // Explicit four-value insets on both ends — the computed shorthand "inset(18% 26%)"
           // only has two values, which GSAP would otherwise pair up lopsidedly.
-          .fromTo('[data-bleed-media]', { clipPath: 'inset(18% 26% 18% 26%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none' }, 0)
+          .fromTo('[data-bleed-media]', { clipPath: 'inset(18% 26% 18% 26% round 18px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none' }, 0)
           .fromTo('[data-bleed-media] img', { scale: 1.25 }, { scale: 1, ease: 'none' }, 0)
           .fromTo('[data-bleed-quote]', { autoAlpha: 0, y: 60 }, { autoAlpha: 1, y: 0, ease: 'none', duration: 0.5 }, 0.45);
       };
