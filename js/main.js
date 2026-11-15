@@ -263,6 +263,86 @@
   }
 
   /* ------------------------------------------------------------------
+     Custom scrollbar — follows Lenis, drag the thumb or click the rail
+     ------------------------------------------------------------------ */
+  {
+    const bar = $('[data-scrollbar]');
+    const thumb = $('[data-scrollbar-thumb]', bar);
+    const count = $('[data-scrollbar-count]', bar);
+    const INSET = 10, MIN_THUMB = 48, IDLE = 900;
+    let vh = window.innerHeight, docLimit = 0, thumbH = 0, travel = 0;
+    let lastY = -1, lastMove = -Infinity, lastPct = -1, dragging = false, grab = 0;
+
+    const limit = () => (lenis ? lenis.limit : docLimit);
+    const scrollY = () => (lenis ? lenis.animatedScroll : window.scrollY);
+    const measure = () => {
+      vh = window.innerHeight;
+      docLimit = Math.max(0, document.documentElement.scrollHeight - vh);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    ScrollTrigger.addEventListener('refresh', measure);
+
+    const scrollToRatio = (r, opts) => {
+      const y = gsap.utils.clamp(0, 1, r) * limit();
+      if (lenis) lenis.scrollTo(y, opts);
+      else window.scrollTo(0, y);
+    };
+
+    gsap.ticker.add(() => {
+      const max = limit();
+      const track = vh - INSET * 2;
+      const ready = max > 4 && !(lenis && lenis.isStopped);
+      bar.classList.toggle('is-ready', ready);
+      if (!ready) { bar.classList.remove('is-active'); return; }
+
+      thumbH = Math.max(MIN_THUMB, track * (vh / (max + vh)));
+      travel = track - thumbH;
+      const y = scrollY();
+      const r = gsap.utils.clamp(0, 1, y / max);
+      thumb.style.height = `${thumbH}px`;
+      thumb.style.transform = `translate3d(0, ${INSET + r * travel}px, 0)`;
+
+      const pct = Math.round(r * 100);
+      if (pct !== lastPct) { count.textContent = pct; lastPct = pct; }
+
+      const now = performance.now();
+      if (Math.abs(y - lastY) > 0.5) { lastMove = now; lastY = y; }
+      bar.classList.toggle('is-active', dragging || now - lastMove < IDLE);
+    });
+
+    const thumbTop = () => thumb.getBoundingClientRect().top;
+    bar.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || !bar.classList.contains('is-ready')) return;
+      e.preventDefault();
+      if (e.target.closest('[data-scrollbar-thumb]')) {
+        grab = e.clientY - thumbTop();
+      } else {
+        // Click on the rail: glide there, and keep the thumb under the pointer for a drag.
+        grab = thumbH / 2;
+        scrollToRatio((e.clientY - INSET - grab) / travel, { duration: 1.4 });
+      }
+      dragging = true;
+      bar.classList.add('is-dragging');
+      document.documentElement.classList.add('is-scrubbing');
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      scrollToRatio((e.clientY - INSET - grab) / travel, { lerp: 0.18 });
+    });
+    const release = () => {
+      if (!dragging) return;
+      dragging = false;
+      bar.classList.remove('is-dragging');
+      document.documentElement.classList.remove('is-scrubbing');
+    };
+    bar.addEventListener('pointerup', release);
+    bar.addEventListener('pointercancel', release);
+    bar.addEventListener('lostpointercapture', release);
+  }
+
+  /* ------------------------------------------------------------------
      Newsletter & back-to-top
      ------------------------------------------------------------------ */
   $$('[data-newsletter]').forEach((form) => form.addEventListener('submit', (e) => {

@@ -41,7 +41,10 @@
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scrollbar-width: none; }
+/* Native scrollbars are hidden everywhere; the page uses the custom rail below. */
+* { scrollbar-width: none; }
+::-webkit-scrollbar { width: 0; height: 0; display: none; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -403,6 +406,74 @@ html.has-cursor * { cursor: none !important; }
 @media (hover: hover) and (pointer: fine) {
   .cursor { display: block; }
   .cursor-label { display: grid; }
+}
+
+/* ---------- Scrollbar ---------- */
+/* A hairline rail on the right edge. The thumb is a slim pill that fades in
+   while you scroll, widens when you reach for it, and shows how far through
+   the page you are. Like the cursor, it uses difference blending, so it
+   reads on cream paper and on dark imagery alike. Positioning is done in JS. */
+.scrollbar {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  z-index: 140;
+  width: 18px;
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease-out);
+  touch-action: none;
+}
+.scrollbar::before {
+  content: '';
+  position: absolute;
+  top: 10px; bottom: 10px; right: 6px;
+  width: 1px;
+  background: var(--white);
+  opacity: 0;
+  transform: scaleY(0.6);
+  transition: opacity 0.6s var(--ease-out), transform 0.9s var(--ease-out);
+}
+.scrollbar.is-ready { pointer-events: auto; }
+.scrollbar.is-active { opacity: 1; }
+.scrollbar.is-ready:hover,
+.scrollbar.is-dragging { opacity: 1; }
+.scrollbar.is-ready:hover::before,
+.scrollbar.is-dragging::before { opacity: 0.28; transform: scaleY(1); }
+.scrollbar__thumb {
+  position: absolute;
+  top: 0; right: 5px;
+  width: 3px;
+  border-radius: 99px;
+  background: var(--white);
+  opacity: 0.62;
+  will-change: transform;
+  transition: width 0.5s var(--ease-out), right 0.5s var(--ease-out), opacity 0.5s var(--ease-out);
+}
+.scrollbar.is-ready:hover .scrollbar__thumb,
+.scrollbar.is-dragging .scrollbar__thumb { width: 5px; right: 4px; opacity: 0.95; }
+.scrollbar__count {
+  position: absolute;
+  top: 50%; right: 14px;
+  color: var(--white);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(6px, -50%);
+  transition: opacity 0.45s var(--ease-out), transform 0.6s var(--ease-out);
+  pointer-events: none;
+}
+.scrollbar__count::after { content: '%'; opacity: 0.55; margin-left: 1px; }
+.scrollbar.is-ready:hover .scrollbar__count,
+.scrollbar.is-dragging .scrollbar__count { opacity: 1; transform: translate(0, -50%); }
+.scrollbar.is-dragging,
+html.is-scrubbing, html.is-scrubbing * { user-select: none; -webkit-user-select: none; }
+@media (hover: none) {
+  .scrollbar { width: 10px; }
+  .scrollbar__count { display: none; }
 }
 
 /* ==========================================================================

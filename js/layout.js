@@ -70,7 +70,10 @@
   const extras = `
     <div class="toast" data-toast role="status" aria-live="polite"></div>
     <div class="cursor" data-cursor-dot aria-hidden="true"></div>
-    <div class="cursor-label" data-cursor-label aria-hidden="true"></div>`;
+    <div class="cursor-label" data-cursor-label aria-hidden="true"></div>
+    <div class="scrollbar" data-scrollbar aria-hidden="true">
+      <div class="scrollbar__thumb" data-scrollbar-thumb><span class="scrollbar__count" data-scrollbar-count>0</span></div>
+    </div>`;
 
   document.body.insertAdjacentHTML('afterbegin', header + menu + cart);
   const main = document.querySelector('main');
