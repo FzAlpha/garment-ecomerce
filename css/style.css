@@ -329,74 +329,59 @@ html.js:not(.veil-in) .loader { display: block; }
 .toast.is-visible { transform: translate(-50%, 0); visibility: visible; transition: transform 0.7s var(--ease), visibility 0s; }
 
 /* ---------- Cursor ---------- */
-/* A point, a hairline ring that trails it, and a label bubble for imagery.
-   Both point and ring use difference blending so they read on paper and on photographs. */
-.cursor,
-.cursor-ring {
+/* A single soft lens. It trails the pointer with a little weight and stretches
+   along its path. It inverts whatever it passes over, swells over links and
+   thins to a caret in fields. Over imagery it gives way to a frosted paper disc
+   with a serif caption. All sizing is done with transforms in JS. */
+.cursor {
   position: fixed;
   top: 0; left: 0;
-  pointer-events: none;
-  mix-blend-mode: difference;
-  display: none;
-}
-.cursor {
   z-index: 252;
-  width: 6px; height: 6px;
-  margin: -3px 0 0 -3px;
+  width: 40px; height: 40px;
+  margin: -20px 0 0 -20px;
   border-radius: 50%;
   background: var(--white);
-  transition: opacity 0.3s;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  display: none;
+  will-change: transform;
+  transition: opacity 0.4s var(--ease-out);
 }
-.cursor-ring {
-  z-index: 251;
-  width: 36px; height: 36px;
-  margin: -18px 0 0 -18px;
-  border-radius: 50%;
-  border: 1px solid var(--white);
-  background-color: rgba(250, 249, 246, 0);
-  transition:
-    width 0.55s var(--ease-out), height 0.55s var(--ease-out), margin 0.55s var(--ease-out),
-    border-radius 0.55s var(--ease-out), background-color 0.4s, border-color 0.4s, opacity 0.4s;
-}
-/* Links & buttons — the ring swells and fills, inverting what sits beneath it */
-.cursor-ring.is-link {
-  width: 56px; height: 56px;
-  margin: -28px 0 0 -28px;
-  background-color: rgba(250, 249, 246, 1);
-  border-color: transparent;
-}
-/* Text fields — the ring collapses into a caret */
-.cursor-ring.is-text {
-  width: 2px; height: 24px;
-  margin: -12px 0 0 -1px;
-  border-radius: 1px;
-  background-color: rgba(250, 249, 246, 1);
-  border-color: transparent;
-}
-.cursor-ring.is-media { opacity: 0; }
-.cursor.is-hidden { opacity: 0; }
-.cursor-ring.is-hidden { opacity: 0; }
-html.has-cursor,
-html.has-cursor * { cursor: none !important; }
 .cursor-label {
   position: fixed;
   top: 0; left: 0;
   z-index: 251;
-  pointer-events: none;
-  width: 84px; height: 84px;
-  margin: -42px 0 0 -42px;
+  width: 108px; height: 108px;
+  margin: -54px 0 0 -54px;
   border-radius: 50%;
-  background: var(--paper);
+  background: rgba(247, 245, 241, 0.86);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 0 0 1px rgba(22, 21, 19, 0.06), 0 18px 40px -18px rgba(22, 21, 19, 0.35);
   color: var(--ink);
+  pointer-events: none;
   display: none;
   place-items: center;
-  font-size: var(--fs-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   transform: scale(0);
+  will-change: transform;
+  transition: opacity 0.4s var(--ease-out);
 }
+.cursor-label__clip { display: block; overflow: hidden; padding: 2px 6px 4px; }
+.cursor-label__text {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.cursor.is-hidden,
+.cursor-label.is-hidden { opacity: 0; }
+html.has-cursor,
+html.has-cursor * { cursor: none !important; }
 @media (hover: hover) and (pointer: fine) {
-  .cursor, .cursor-ring { display: block; }
+  .cursor { display: block; }
   .cursor-label { display: grid; }
 }
 

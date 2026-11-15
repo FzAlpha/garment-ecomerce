@@ -176,58 +176,71 @@
      Custom cursor
      ------------------------------------------------------------------ */
   if (finePointer) {
-    const dot = $('[data-cursor-dot]');
-    const ring = $('[data-cursor-ring]');
+    const lens = $('[data-cursor-dot]');
     const label = $('[data-cursor-label]');
+    label.innerHTML = '<span class="cursor-label__clip"><span class="cursor-label__text"></span></span>';
+    const caption = $('.cursor-label__text', label);
     document.documentElement.classList.add('has-cursor');
 
-    // The point tracks almost instantly; the ring and label trail behind it.
-    // With reduced motion everything simply follows the pointer, no lag.
-    const lag = (d) => (reduce ? 0.001 : d);
-    const mover = (el, d) => [gsap.quickTo(el, 'x', { duration: lag(d), ease: 'power3' }),
-                              gsap.quickTo(el, 'y', { duration: lag(d), ease: 'power3' })];
-    const [dx, dy] = mover(dot, 0.12);
-    const [rx, ry] = mover(ring, 0.55);
-    const [lx, ly] = mover(label, 0.6);
-    const parts = [dot, ring];
+    // One animated state drives both elements, rendered on GSAP's ticker:
+    //   x/y follow the pointer with frame-rate-independent easing,
+    //   sx/sy shape the lens, ls scales the image disc,
+    //   p is press feedback, and st sets how much motion may stretch it.
+    const S = { x: 0, y: 0, tx: 0, ty: 0, sx: 0.2, sy: 0.2, ls: 0, p: 1, st: 1 };
+    const FOLLOW = reduce ? 1 : 0.17;
+    let seen = false, vel = 0, angle = 0;
 
-    let seen = false;
-    const last = { x: 0, y: 0 };
-    window.addEventListener('pointermove', (e) => {
-      const { clientX: x, clientY: y } = e;
-      last.x = x; last.y = y;
-      if (!seen) { // first move: place everything under the pointer instead of flying in from 0,0
-        seen = true;
-        gsap.set([dot, ring, label], { x, y });
-        parts.forEach((p) => p.classList.remove('is-hidden'));
-      }
-      dx(x); dy(y); rx(x); ry(y); lx(x); ly(y);
+    gsap.ticker.add((time, dt) => {
+      if (!seen) return;
+      const f = Math.max(dt / 16.67, 0.25);
+      const k = 1 - Math.pow(1 - FOLLOW, f);
+      const mx = (S.tx - S.x) * k, my = (S.ty - S.y) * k;
+      S.x += mx; S.y += my;
+      const speed = Math.hypot(mx, my) / f;
+      if (speed > 0.4) angle = Math.atan2(my, mx) * 57.2958;
+      const target = reduce ? 0 : Math.min(speed / 45, 0.32) * S.st;
+      vel += (target - vel) * 0.2;
+      // Rotate into the direction of travel, stretch, rotate back,
+      // so the stretch follows the path but the base shape never tilts.
+      lens.style.transform =
+        `translate3d(${S.x}px, ${S.y}px, 0) rotate(${angle}deg) scale(${1 + vel}, ${1 - vel * 0.45}) rotate(${-angle}deg) scale(${S.sx * S.p}, ${S.sy * S.p})`;
+      label.style.transform = `translate3d(${S.x}px, ${S.y}px, 0) scale(${S.ls * S.p})`;
     });
 
-    // Hide while the pointer is outside the window
-    document.documentElement.addEventListener('pointerleave', () => parts.forEach((p) => p.classList.add('is-hidden')));
-    document.documentElement.addEventListener('pointerenter', () => parts.forEach((p) => p.classList.remove('is-hidden')));
-    parts.forEach((p) => p.classList.add('is-hidden'));
+    window.addEventListener('pointermove', (e) => {
+      S.tx = e.clientX; S.ty = e.clientY;
+      if (!seen) { // first move: appear under the pointer instead of flying in from 0,0
+        seen = true;
+        S.x = S.tx; S.y = S.ty;
+        lens.classList.remove('is-hidden'); label.classList.remove('is-hidden');
+      }
+    }, { passive: true });
 
-    // Press feedback
-    window.addEventListener('pointerdown', () => gsap.to(ring, { scale: 0.78, duration: 0.25, ease: 'power3.out' }));
-    window.addEventListener('pointerup', () => gsap.to(ring, { scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)' }));
+    const hide = (on) => [lens, label].forEach((el) => el.classList.toggle('is-hidden', on));
+    document.documentElement.addEventListener('pointerleave', () => hide(true));
+    document.documentElement.addEventListener('pointerenter', () => seen && hide(false));
+    hide(true);
 
+    window.addEventListener('pointerdown', () => gsap.to(S, { p: 0.72, duration: 0.3, ease: 'power3.out' }));
+    window.addEventListener('pointerup', () => gsap.to(S, { p: 1, duration: 0.7, ease: 'elastic.out(1, 0.55)' }));
+
+    const SHAPES = {
+      '':    { sx: 0.2,  sy: 0.2,  ls: 0, st: 1 },    // 8px point
+      link:  { sx: 1,    sy: 1,    ls: 0, st: 0.45 }, // 40px inverting disc
+      text:  { sx: 0.03, sy: 0.58, ls: 0, st: 0 },    // hairline caret
+      media: { sx: 0,    sy: 0,    ls: 1, st: 0 },    // gives way to the caption disc
+    };
     const TEXT = 'input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea, [contenteditable]';
     const LINK = 'a, button, label, select, summary, [role="button"], [data-filter]';
-    let mode = '';
-    const setMode = (next, text) => {
-      if (next === mode && next !== 'media') return;
-      mode = next;
-      ring.classList.toggle('is-link', next === 'link');
-      ring.classList.toggle('is-text', next === 'text');
-      ring.classList.toggle('is-media', next === 'media');
-      gsap.to(dot, { scale: next === '' ? 1 : 0, duration: 0.3, ease: 'power3.out' });
+    let mode = null, word = '';
+    const setMode = (next, text = '') => {
+      if (next === mode && text === word) return;
+      const wasMedia = mode === 'media';
+      mode = next; word = text;
+      gsap.to(S, { ...SHAPES[next], duration: next === 'media' || wasMedia ? 0.75 : 0.6, ease: 'expo.out', overwrite: 'auto' });
       if (next === 'media') {
-        label.textContent = text;
-        gsap.to(label, { scale: 1, duration: 0.6, ease: 'expo.out' });
-      } else {
-        gsap.to(label, { scale: 0, duration: 0.5, ease: 'expo.out' });
+        caption.textContent = text;
+        gsap.fromTo(caption, { yPercent: 120 }, { yPercent: 0, duration: 0.8, delay: wasMedia ? 0 : 0.08, ease: 'expo.out', overwrite: true });
       }
     };
     const resolve = (el) => {
@@ -238,9 +251,10 @@
       if (el.closest(LINK)) return setMode('link');
       setMode('');
     };
+    setMode('');
     document.addEventListener('pointerover', (e) => resolve(e.target));
     // Content can change under a still pointer (menus opening, filters re-rendering)
-    document.addEventListener('click', () => requestAnimationFrame(() => resolve(document.elementFromPoint(last.x, last.y))));
+    document.addEventListener('click', () => requestAnimationFrame(() => resolve(document.elementFromPoint(S.tx, S.ty))));
   }
 
   /* ------------------------------------------------------------------

@@ -69,7 +69,6 @@
 
   const extras = `
     <div class="toast" data-toast role="status" aria-live="polite"></div>
-    <div class="cursor-ring" data-cursor-ring aria-hidden="true"></div>
     <div class="cursor" data-cursor-dot aria-hidden="true"></div>
     <div class="cursor-label" data-cursor-label aria-hidden="true"></div>`;
 
