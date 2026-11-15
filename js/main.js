@@ -30,6 +30,8 @@
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
     lenis.stop(); // held until the intro finishes
+    // Pins add height to the page; make Lenis re-measure whenever ScrollTrigger does
+    ScrollTrigger.addEventListener('refresh', () => lenis.resize());
   }
   window.lenis = lenis;
 
@@ -82,6 +84,7 @@
       trigger: zone,
       start: zone.dataset.headerDark || 'top top+=34',
       end: 'bottom top+=34',
+      refreshPriority: -1,
       onToggle: syncHeaderTone,
     }));
   });
@@ -461,24 +464,50 @@
           scrollTrigger: { trigger: words, start: 'top 80%', end: 'bottom 50%', scrub: true },
         });
 
-        // Lookbook — pinned horizontal scroll on larger screens
-        const mm = gsap.matchMedia();
-        mm.add('(min-width: 861px)', () => {
-          const track = $('[data-lookbook-track]');
-          const distance = () => track.scrollWidth - window.innerWidth;
-          gsap.timeline({
+
+        // Index of looks — pinned. Names roll through the centre of the screen
+        // while each photograph wipes up over the one before it.
+        const index = $('[data-index]');
+        if (index) {
+          const frames = $$('.index__frame', index);
+          const items = $$('.index__item', index);
+          const list = $('[data-index-list]', index);
+          const count = $('[data-index-count]', index);
+          const n = items.length;
+          let current = -1;
+          const setActive = (i) => {
+            if (i === current) return;
+            current = i;
+            items.forEach((it, j) => it.classList.toggle('is-active', j === i));
+            count.textContent = String(i + 1).padStart(2, '0');
+          };
+          setActive(0);
+          gsap.set(frames.slice(1), { clipPath: 'inset(100% 0% 0% 0%)' });
+
+          // Each step: a short hold, then the reel and the photograph move together
+          const HOLD = 0.3, MOVE = 0.7;
+          const reel = gsap.timeline({
+            defaults: { ease: 'power2.inOut', duration: MOVE },
+            onUpdate: () => setActive(Math.max(0, Math.min(n - 1, Math.floor(reel.time() - HOLD - MOVE / 2) + 1))),
             scrollTrigger: {
-              trigger: '[data-lookbook]',
+              trigger: index,
               start: 'top top',
-              end: () => '+=' + distance(),
-              pin: '.lookbook__pin',
-              scrub: 1,
+              end: () => '+=' + window.innerHeight * 0.75 * (n - 1),
+              pin: '[data-index-pin]',
+              scrub: 0.8,
               invalidateOnRefresh: true,
             },
-          })
-            .to(track, { x: () => -distance(), ease: 'none' }, 0)
-            .fromTo('[data-lookbook-progress]', { scaleX: 0 }, { scaleX: 1, ease: 'none' }, 0);
-        });
+          });
+          for (let i = 1; i < n; i++) {
+            const at = i - 1 + HOLD;
+            reel
+              .to(list, { y: () => items[0].offsetTop - items[i].offsetTop }, at)
+              .fromTo(frames[i], { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', immediateRender: false }, at)
+              .fromTo($('img', frames[i]), { scale: 1.35 }, { scale: 1, immediateRender: false }, at)
+              .to($('img', frames[i - 1]), { scale: 1.12, yPercent: -5 }, at);
+          }
+          reel.to({}, { duration: HOLD });
+        }
 
         // Full-bleed clip-path reveal
         gsap.timeline({ scrollTrigger: { trigger: '[data-bleed]', start: 'top top', end: 'bottom bottom', scrub: true } })
