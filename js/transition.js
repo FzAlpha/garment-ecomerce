@@ -57,50 +57,82 @@ const Veil = (() => {
     });
   }
 
-  /* ---------- First visit loader ---------- */
+  /* ---------- First visit loader ----------
+     focus   : letters rise out of a blur while the word draws its spacing in
+     load    : a hairline tracks the hero image (and fonts) loading
+     aperture: the word drifts away, a small rounded window opens onto the
+               hero photograph, then widens to the full screen
+     handover: the window ends at exactly the hero's starting scale, so the
+               loader is removed without a seam and the hero intro continues */
   function loader() {
     return new Promise((resolve) => {
       const el = document.querySelector('[data-loader]');
       if (!el) return resolve();
       if (reduce) { el.remove(); return resolve(); }
 
-      const letters = el.querySelectorAll('[data-loader-mark] span');
-      const count = el.querySelector('[data-loader-count]');
-      const bar = el.querySelector('[data-loader-bar]');
+      const mark = el.querySelector('[data-loader-mark]');
+      const letters = mark.querySelectorAll('span');
+      const line = el.querySelector('[data-loader-line]');
+      const win = el.querySelector('[data-loader-window]');
+      const img = el.querySelector('[data-loader-img]');
       const quick = seen();
-      const total = quick ? 0.9 : 2.2;
-      const counter = { v: 0 };
 
-      // Make sure the hero image has a head start before we lift the curtain.
       const heroImg = document.querySelector('[data-hero-media] img');
-      const imgReady = new Promise((r) => {
-        if (!heroImg || heroImg.complete) return r();
-        heroImg.addEventListener('load', r, { once: true });
-        heroImg.addEventListener('error', r, { once: true });
-        setTimeout(r, 3500);
+      if (heroImg) img.src = heroImg.currentSrc || heroImg.src;
+      const loaded = (im) => new Promise((r) => {
+        if (!im || (im.complete && im.naturalWidth)) return r();
+        im.addEventListener('load', r, { once: true });
+        im.addEventListener('error', r, { once: true });
       });
+      const ready = Promise.race([
+        Promise.all([loaded(heroImg), loaded(img), document.fonts ? document.fonts.ready : null]),
+        new Promise((r) => setTimeout(r, 4000)),
+      ]);
 
-      // Letters sit below their mask (CSS); y:0 clears the parsed CSS offset.
-      gsap.set(letters, { y: 0, yPercent: 105 });
+      // Aperture geometry in px, so every clip-path value interpolates cleanly
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const aw = Math.min(Math.max(vw * 0.2, 150), 300), ah = Math.min(aw * 1.32, vh * 0.62);
+      const ix = (vw - aw) / 2, iy = (vh - ah) / 2;
+      const clip = (t, r, b, l, rad) => `inset(${t}px ${r}px ${b}px ${l}px round ${rad}px)`;
 
-      const tl = gsap.timeline();
-      tl.to(letters, { yPercent: 0, duration: 1.2, ease: 'expo.out', stagger: 0.06 }, 0.15)
-        .to(counter, {
-          v: 100,
-          duration: total,
-          ease: 'power2.inOut',
-          onUpdate: () => { count.textContent = String(Math.round(counter.v)).padStart(3, '0'); },
-        }, 0)
-        .to(bar, { scaleX: 1, duration: total, ease: 'power2.inOut' }, 0);
+      gsap.set(win, { clipPath: clip(vh / 2, vw / 2, vh / 2, vw / 2, 18) });
+      gsap.set(img, { scale: 1.75 });
+      gsap.set(letters, { opacity: 0, yPercent: 35, filter: 'blur(14px)' });
+      gsap.set(mark, { letterSpacing: '0.34em' });
 
-      Promise.all([imgReady, tl.then()]).then(() => {
+      const k = quick ? 0.55 : 1;
+      const focus = gsap.timeline()
+        .to(mark, { letterSpacing: '-0.01em', duration: 2.4 * k, ease: 'expo.out' }, 0)
+        .to(letters, {
+          opacity: 1, yPercent: 0, filter: 'blur(0px)',
+          duration: 1.7 * k, ease: 'power3.out',
+          stagger: { each: 0.085 * k, from: 'center' },
+        }, 0.1)
+        .to(line, { scaleX: 0.82, duration: 1.9 * k, ease: 'power2.inOut' }, 0.35);
+
+      Promise.all([ready, focus.then()]).then(() => {
         markSeen();
-        gsap.set(el, { clipPath: 'inset(0% 0% 0% 0%)' });
-        gsap.timeline({ onComplete: () => el.remove() })
-          .to(letters, { yPercent: -105, duration: 0.7, ease: 'power3.in', stagger: 0.03 }, 0)
-          .to(count, { autoAlpha: 0, duration: 0.4 }, 0)
-          .to(el, { clipPath: 'inset(0% 0% 100% 0%)', duration: 1.1, ease: EASE }, 0.45)
-          .call(resolve, null, 0.85);
+        gsap.timeline({ onComplete: () => { el.remove(); resolve(); } })
+          // finish the hairline, then let it retract to the right
+          .to(line, { scaleX: 1, duration: 0.35, ease: 'power2.out' }, 0)
+          .set(line, { transformOrigin: '100% 50%' }, 0.4)
+          .to(line, { scaleX: 0, duration: 0.55, ease: 'power3.in' }, 0.4)
+          // the word drifts up and dissolves from its edges inwards
+          .to(letters, {
+            opacity: 0, yPercent: -28, filter: 'blur(10px)',
+            duration: 0.8, ease: 'power3.in',
+            stagger: { each: 0.04, from: 'edges' },
+          }, 0.45)
+          // a small portrait window opens onto the photograph…
+          // (explicit four-value from/to: the browser hands back a shortened
+          //  inset() that GSAP would otherwise pair up asymmetrically)
+          .fromTo(win, { clipPath: clip(vh / 2, vw / 2, vh / 2, vw / 2, 18) },
+            { clipPath: clip(iy, ix, iy, ix, 18), duration: 1.1, ease: 'expo.out', immediateRender: false }, 1.05)
+          .to(img, { scale: 1.5, duration: 1.1, ease: 'expo.out' }, 1.05)
+          // …then widens to the full screen, landing on the hero's start scale
+          .fromTo(win, { clipPath: clip(iy, ix, iy, ix, 18) },
+            { clipPath: clip(0, 0, 0, 0, 0), duration: 1.35, ease: 'power4.inOut', immediateRender: false }, 1.7)
+          .to(img, { scale: 1.3, duration: 1.35, ease: 'power4.inOut' }, 1.7);
       });
     });
   }
