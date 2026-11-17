@@ -9,6 +9,7 @@
    between  : the destination's name rises in the centre
    navigate : browser loads the next page (flag kept in sessionStorage)
    reveal   : on the new page the columns retract upwards, staggered
+   Designed & built by Velvané studio — https://website-checker-lmdx.vercel.app/
    ========================================================================== */
 const Veil = (() => {
   const root = document.documentElement;
@@ -74,7 +75,10 @@ const Veil = (() => {
   // The ivory sheet, drawn in SVG so the word can later be cut out of it.
   // Its glow matches the CSS background it replaces exactly.
   function sheet(el) {
-    const vw = window.innerWidth, vh = window.innerHeight, vmax = Math.max(vw, vh);
+    // never zero, even if the page loads before the window has a size
+    const vw = window.innerWidth || document.documentElement.clientWidth || 1;
+    const vh = window.innerHeight || document.documentElement.clientHeight || 1;
+    const vmax = Math.max(vw, vh);
     const css = getComputedStyle(document.documentElement);
     const cx = vw / 2, cy = vh * 0.56, rx = vmax * 0.6, ry = vmax * 0.46;
     const root = svg('svg', { class: 'loader__cut', viewBox: `0 0 ${vw} ${vh}`, preserveAspectRatio: 'none', 'aria-hidden': 'true' });
@@ -167,6 +171,9 @@ const Veil = (() => {
       const mark = el.querySelector('[data-loader-mark]');
       const letters = [...mark.querySelectorAll('span')];
       const line = el.querySelector('[data-loader-line]');
+      const credit = el.querySelector('[data-loader-credit]');
+      const strokes = credit ? credit.querySelectorAll('.credit-x path') : [];
+      const logo = credit ? credit.querySelectorAll('.velvane-logo path') : [];
       const quick = seen();
       const s = sheet(el);
 
@@ -183,6 +190,7 @@ const Veil = (() => {
 
       gsap.set(letters, { opacity: 0, yPercent: 35, filter: 'blur(14px)' });
       gsap.set(mark, { letterSpacing: '0.34em' });
+      gsap.set([...strokes, ...logo], { strokeDasharray: 1, strokeDashoffset: 1 });
 
       const k = quick ? 0.55 : 1;
       const focus = gsap.timeline()
@@ -192,7 +200,11 @@ const Veil = (() => {
           duration: 1.7 * k, ease: 'power3.out',
           stagger: { each: 0.085 * k, from: 'center' },
         }, 0.1)
-        .to(line, { scaleX: 0.82, duration: 1.9 * k, ease: 'power2.inOut' }, 0.35);
+        .to(line, { scaleX: 0.82, duration: 1.9 * k, ease: 'power2.inOut' }, 0.35)
+        // the maker's mark: "× Velvané" rises under the wordmark
+        .fromTo(credit, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1.2 * k, ease: 'power3.out' }, 0.9 * k)
+        // Velvané's wordmark draws itself in, stroke by stroke, as on the studio's site
+        .to(logo, { strokeDashoffset: 0, duration: 0.6 * k, ease: 'power3.inOut', stagger: 0.06 * k }, 0.95 * k);
 
       Promise.all([ready, focus.then()]).then(() => {
         markSeen();
@@ -207,6 +219,9 @@ const Veil = (() => {
           .to(line, { scaleX: 1, duration: 0.35, ease: 'power2.out' }, 0)
           .set(line, { transformOrigin: '100% 50%' }, 0.4)
           .to(line, { scaleX: 0, duration: 0.55, ease: 'power3.in' }, 0.4)
+          // as the hairline signs off, it draws the × before Velvané
+          .to(strokes, { strokeDashoffset: 0, duration: 0.45, ease: 'power2.inOut', stagger: 0.12 }, 0.2)
+          .to(credit, { opacity: 0, y: -6, duration: 0.7, ease: 'power2.in' }, 1.1)
           // the ink drains out: each letter becomes a window onto the hero
           .set(s.word, { attr: { opacity: 1 } }, 0.7)
           .to(letters, { opacity: 0, duration: 0.9, ease: 'power2.inOut', stagger: { each: 0.07, from: 'center' } }, 0.7)

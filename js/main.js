@@ -1,6 +1,7 @@
 /* ==========================================================================
    Vérane — interactions & motion
    GSAP (ScrollTrigger, SplitText, Flip) + Lenis smooth scroll
+   Designed & built by Velvané studio — https://website-checker-lmdx.vercel.app/
    ========================================================================== */
 (() => {
   const plugins = [ScrollTrigger, SplitText];
@@ -499,15 +500,21 @@
       });
     });
 
-    // Footer wordmark rises letter by letter.
+    // Footer wordmark rises letter by letter, then Velvané signs underneath:
+    // the × draws itself, then Velvané's wordmark draws stroke by stroke,
+    // the way it draws itself in on the studio's own site.
     const mark = $$('.footer__mark span');
     if (mark.length) {
-      gsap.from(mark, {
-        yPercent: 100,
-        duration: 1.4,
-        stagger: 0.06,
-        scrollTrigger: { trigger: '.footer__mark', start: 'top 98%', once: true },
-      });
+      const sign = $('.footer__sign');
+      const tl = gsap.timeline({ scrollTrigger: { trigger: '.footer__mark', start: 'top 98%', once: true } });
+      tl.from(mark, { yPercent: 100, duration: 1.4, stagger: 0.06 });
+      if (sign) {
+        const draw = { strokeDasharray: 1, strokeDashoffset: 1 };
+        tl.fromTo(sign.querySelectorAll('.credit-x path'), draw,
+          { strokeDashoffset: 0, duration: 0.5, ease: 'power2.inOut', stagger: 0.12 }, 0.9)
+          .fromTo(sign.querySelectorAll('.velvane-logo path'), draw,
+            { strokeDashoffset: 0, duration: 0.7, ease: 'power3.inOut', stagger: 0.08 }, 1.1);
+      }
     }
   };
 

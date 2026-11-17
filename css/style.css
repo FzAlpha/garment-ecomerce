@@ -1,6 +1,7 @@
 /* ==========================================================================
    VÉRANE — Maison de couture, Paris
    Type: Instrument Serif (display) · Inter Tight (text & UI)
+   Designed & built by Velvané studio — https://website-checker-lmdx.vercel.app/
    ========================================================================== */
 
 :root {
@@ -211,6 +212,24 @@ html.js:not(.veil-in) .loader { display: block; }
   letter-spacing: -0.01em;
 }
 .loader__mark span { display: inline-block; opacity: 0; will-change: transform, filter, opacity; }
+/* The maker's mark under the hairline: "× Velvané", completing the wordmark above */
+.loader__credit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: 0;
+}
+/* Velvané's wordmark, drawn from the studio's own SVG: never restyled, only sized */
+.velvane-logo { display: block; height: 18px; width: auto; flex: none; overflow: visible; }
+.velvane-logo--sm g { stroke-width: 4.2; } /* the studio's own weight for small sizes */
+.loader__credit .velvane-logo { height: 11px; }
+.loader__credit .velvane-logo g { stroke-width: 4.2; }
+.credit-x { width: 0.8em; height: 0.8em; flex: none; overflow: visible; }
+/* stroke in viewBox units: non-scaling-stroke would break the pathLength-based draw-on */
+.credit-x path { fill: none; stroke: currentColor; stroke-width: 1.15; stroke-linecap: round; }
 .loader__line { display: block; width: clamp(72px, 8vw, 128px); height: 1px; background: currentColor; opacity: 0.4; transform: scaleX(0); }
 
 /* ==========================================================================
@@ -637,8 +656,36 @@ html.js .hero__title { visibility: hidden; }
   margin-inline: -0.02em;
 }
 .footer__mark span { display: inline-block; }
+/* The studio's signature under the wordmark: × Velvané */
+.footer__lockup { position: relative; }
+.footer__sign {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6em;
+  margin: clamp(14px, 1.8vw, 28px) 0 0;
+  padding-right: 1.2vw;
+  font-size: clamp(22px, 3vw, 48px); /* the wordmark's height */
+  line-height: 1;
+  color: rgba(241, 232, 219, 0.82);
+}
+.footer__sign .velvane-logo { height: 1em; }
+.footer__sign-x { display: inline-flex; color: rgba(241, 232, 219, 0.5); }
+.footer__sign .credit-x { width: 0.5em; height: 0.5em; }
+.footer__sign .credit-x path { stroke-width: 0.8; }
+.footer__studio { display: inline-flex; align-items: center; font-size: var(--fs-xs); padding: 0; gap: 0.6em; color: inherit; }
+.footer__studio .velvane-logo { height: 10px; color: var(--bg); }
+.footer__studio span { transition: transform 0.6s var(--ease); }
+.footer__studio:hover span { transform: translate(2px, -2px); }
 .footer__bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(241, 232, 219, 0.15); font-size: var(--fs-xs); color: rgba(241, 232, 219, 0.55); }
 .footer__bottom a:hover { color: var(--bg); }
+.footer__bottom { align-items: center; }
+.footer__copy, .footer__top { flex: 1 1 0; }
+.footer__top { text-align: right; }
+@media (max-width: 600px) {
+  .footer__bottom { display: grid; grid-template-columns: 1fr auto; row-gap: 14px; }
+  .footer__studio { grid-column: 1 / -1; grid-row: 1; justify-self: start; }
+}
 
 /* ==========================================================================
    COLLECTION

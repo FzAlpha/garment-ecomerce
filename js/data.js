@@ -1,6 +1,7 @@
 /* ==========================================================================
    Vérane — product catalogue
    Photography: Unsplash (https://unsplash.com) — free to use under the Unsplash License.
+   Designed & built by Velvané studio — https://website-checker-lmdx.vercel.app/
    ========================================================================== */
 
 const IMG = (id, w = 1200) =>
